@@ -11,8 +11,6 @@ let allBooks = [];
 let allAuthors = [];
 let editingId = null;
 
-const GENRES = ['Fantastyka','Kryminał','Romans','Thriller','Sci-Fi','Horror','Historia','Biografia','Poezja','Inne'];
-
 function esc(str) {
   return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
@@ -26,23 +24,59 @@ function stars(rating) {
 async function loadAuthors() {
   const res = await fetch(`${API}/authors?order=name`, { headers });
   allAuthors = await res.json();
-  const sel = document.getElementById('author_id');
-  const editSel = document.getElementById('edit_author_id');
   const opts = `<option value="">— brak —</option>` + allAuthors.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join('');
-  sel.innerHTML = opts;
-  editSel.innerHTML = opts;
+  document.getElementById('author_id').innerHTML = opts;
+  document.getElementById('edit_author_id').innerHTML = opts;
 }
 
 async function loadBooks() {
   const res = await fetch(`${API}/books?order=created_at.desc&select=*,authors(id,name)`, { headers });
   allBooks = await res.json();
-  renderGrid(allBooks);
+  applyFilters();
+}
+
+function getSortedBooks(books) {
+  const sort = document.getElementById('sort-select').value;
+  const sorted = [...books];
+  if (sort === 'title') sorted.sort((a,b) => a.title.localeCompare(b.title, 'pl'));
+  if (sort === 'rating') sorted.sort((a,b) => (b.rating||0) - (a.rating||0));
+  if (sort === 'date') sorted.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  return sorted;
+}
+
+function applyFilters() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const genre = document.getElementById('genre-filter').value;
+  let filtered = allBooks;
+  if (q) filtered = filtered.filter(b => {
+    const name = b.authors ? b.authors.name : b.author;
+    return b.title.toLowerCase().includes(q) || (name||'').toLowerCase().includes(q);
+  });
+  if (genre) filtered = filtered.filter(b => b.genre === genre);
+  renderGrid(getSortedBooks(filtered));
 }
 
 function renderGrid(books) {
   const grid = document.getElementById('books-grid');
   document.getElementById('count').textContent = books.length;
-  if (!books.length) { grid.innerHTML = '<div class="empty">Brak wyników.</div>'; return; }
+
+  if (!books.length) {
+    const hasFilters = document.getElementById('search').value || document.getElementById('genre-filter').value;
+    grid.innerHTML = hasFilters
+      ? `<div class="empty-state">
+           <div class="empty-icon">🔍</div>
+           <div class="empty-title">Brak wyników</div>
+           <div class="empty-sub">Spróbuj zmienić kryteria wyszukiwania</div>
+         </div>`
+      : `<div class="empty-state">
+           <div class="empty-icon">📚</div>
+           <div class="empty-title">Twoja biblioteka jest pusta</div>
+           <div class="empty-sub">Dodaj pierwszą książkę używając formularza powyżej!</div>
+           <button class="empty-btn" onclick="document.getElementById('title').focus(); window.scrollTo({top:0,behavior:'smooth'})">+ Dodaj pierwszą książkę</button>
+         </div>`;
+    return;
+  }
+
   grid.innerHTML = books.map(b => {
     const coverHtml = b.cover_url
       ? `<div class="book-cover"><img src="${esc(b.cover_url)}" alt="" onerror="this.parentElement.innerHTML='📖'"/></div>`
@@ -68,7 +102,9 @@ function openModal(id) {
   if (!b) return;
   const authorName = b.authors ? b.authors.name : b.author;
   const coverEl = document.getElementById('modal-cover');
-  coverEl.innerHTML = b.cover_url ? `<img src="${esc(b.cover_url)}" alt="" onerror="this.parentElement.innerHTML='📖'"/>` : '📖';
+  coverEl.innerHTML = b.cover_url
+    ? `<img src="${esc(b.cover_url)}" alt="" onerror="this.parentElement.innerHTML='📖'"/>`
+    : '📖';
   document.getElementById('modal-title').textContent = b.title;
   document.getElementById('modal-author-link').innerHTML = b.authors
     ? `<a href="author.html?id=${b.authors.id}" onclick="event.stopPropagation()">${esc(b.authors.name)}</a>`
@@ -86,12 +122,13 @@ function openEdit(id) {
   if (!b) return;
   editingId = id;
   document.getElementById('edit-title').value = b.title;
-  document.getElementById('edit-author-text').value = b.author;
+  document.getElementById('edit-author-text').value = b.author || '';
   document.getElementById('edit_author_id').value = b.author_id || '';
   document.getElementById('edit-cover').value = b.cover_url || '';
   document.getElementById('edit-description').value = b.description || '';
   document.getElementById('edit-genre').value = b.genre || '';
   const r = document.querySelector(`#edit-form input[name="edit_rating"][value="${b.rating}"]`);
+  document.querySelectorAll('#edit-form input[name="edit_rating"]').forEach(i => i.checked = false);
   if (r) r.checked = true;
   document.getElementById('modal-overlay').classList.remove('open');
   document.getElementById('edit-overlay').classList.add('open');
@@ -147,25 +184,9 @@ document.getElementById('modal-overlay').addEventListener('click', e => {
   if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
 });
 
-document.getElementById('search').addEventListener('input', e => {
-  const q = e.target.value.toLowerCase();
-  const genre = document.getElementById('genre-filter').value;
-  filterAndRender(q, genre);
-});
-document.getElementById('genre-filter').addEventListener('change', e => {
-  const q = document.getElementById('search').value.toLowerCase();
-  filterAndRender(q, e.target.value);
-});
-
-function filterAndRender(q, genre) {
-  let filtered = allBooks;
-  if (q) filtered = filtered.filter(b => {
-    const name = b.authors ? b.authors.name : b.author;
-    return b.title.toLowerCase().includes(q) || name.toLowerCase().includes(q);
-  });
-  if (genre) filtered = filtered.filter(b => b.genre === genre);
-  renderGrid(filtered);
-}
+document.getElementById('search').addEventListener('input', applyFilters);
+document.getElementById('genre-filter').addEventListener('change', applyFilters);
+document.getElementById('sort-select').addEventListener('change', applyFilters);
 
 document.getElementById('add-form').addEventListener('submit', async e => {
   e.preventDefault();

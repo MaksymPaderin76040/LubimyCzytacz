@@ -19,9 +19,13 @@
     .author-card{background:#fafafa;border:1px solid #e5e5e5;border-radius:10px;padding:1.25rem;cursor:pointer;transition:box-shadow .15s,transform .15s}
     .author-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-2px)}
     .author-avatar{width:48px;height:48px;border-radius:50%;background:#ede9fe;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:600;color:#6366f1;margin-bottom:.75rem}
-    .author-card h3{font-size:.95rem;font-weight:600;margin-bottom:.25rem}
-    .author-card .books-count{font-size:.78rem;color:#888}
-    .empty{text-align:center;color:#aaa;font-size:.9rem;padding:2rem 0}
+    .author-card h3{font-size:.95rem;font-weight:600;margin-bottom:.3rem}
+    .author-meta{font-size:.78rem;color:#888;display:flex;gap:.75rem;flex-wrap:wrap}
+    .avg-stars{color:#f59e0b}
+    .empty-state{text-align:center;padding:3rem 1rem;color:#aaa}
+    .empty-icon{font-size:3rem;margin-bottom:1rem}
+    .empty-title{font-size:1rem;font-weight:600;color:#555;margin-bottom:.4rem}
+    .empty-sub{font-size:.85rem}
   </style>
 </head>
 <body>
@@ -34,7 +38,7 @@
   <div class="card">
     <h2>Wszyscy autorzy</h2>
     <div class="authors-grid" id="authors-grid">
-      <div class="empty">Ładowanie...</div>
+      <div class="empty-state"><div class="empty-icon">⏳</div><div class="empty-title">Ładowanie...</div></div>
     </div>
   </div>
 </div>
@@ -46,21 +50,42 @@ const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KE
 async function load() {
   const [aRes, bRes] = await Promise.all([
     fetch(`${SUPABASE_URL}/rest/v1/authors?order=name`, { headers }),
-    fetch(`${SUPABASE_URL}/rest/v1/books?select=author_id`, { headers }),
+    fetch(`${SUPABASE_URL}/rest/v1/books?select=author_id,rating`, { headers }),
   ]);
   const authors = await aRes.json();
   const books = await bRes.json();
-  const counts = {};
-  books.forEach(b => { if (b.author_id) counts[b.author_id] = (counts[b.author_id]||0)+1; });
+
+  const stats = {};
+  books.forEach(b => {
+    if (!b.author_id) return;
+    if (!stats[b.author_id]) stats[b.author_id] = { count: 0, ratingSum: 0, ratingCount: 0 };
+    stats[b.author_id].count++;
+    if (b.rating) { stats[b.author_id].ratingSum += b.rating; stats[b.author_id].ratingCount++; }
+  });
+
   const grid = document.getElementById('authors-grid');
-  if (!authors.length) { grid.innerHTML = '<div class="empty">Brak autorów.</div>'; return; }
+  if (!authors.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-icon">👤</div>
+      <div class="empty-title">Brak autorów</div>
+      <div class="empty-sub">Dodaj autora na stronie głównej</div>
+    </div>`;
+    return;
+  }
+
   grid.innerHTML = authors.map(a => {
     const initials = a.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-    const cnt = counts[a.id] || 0;
+    const s = stats[a.id] || { count: 0, ratingCount: 0, ratingSum: 0 };
+    const cnt = s.count;
+    const avg = s.ratingCount ? (s.ratingSum / s.ratingCount).toFixed(1) : null;
+    const bookLabel = cnt === 1 ? 'książka' : (cnt > 1 && cnt < 5 ? 'książki' : 'książek');
     return `<div class="author-card" onclick="location.href='author.html?id=${a.id}'">
       <div class="author-avatar">${initials}</div>
       <h3>${a.name}</h3>
-      <div class="books-count">${cnt} ${cnt===1?'książka':cnt>1&&cnt<5?'książki':'książek'}</div>
+      <div class="author-meta">
+        <span>${cnt} ${bookLabel}</span>
+        ${avg ? `<span><span class="avg-stars">★</span> ${avg}</span>` : ''}
+      </div>
     </div>`;
   }).join('');
 }
