@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moja Biblioteka</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f5f5f0;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e5e5e5;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    header h1 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    header span {
+      font-size: 1.5rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      border: 1px solid #e5e5e5;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.375rem;
+      color: #555;
+    }
+
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: #6366f1;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    button[type="submit"] {
+      background: #6366f1;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.5rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    button[type="submit"]:hover { background: #4f46e5; }
+    button[type="submit"]:disabled { background: #a5b4fc; cursor: not-allowed; }
+
+    #status {
+      font-size: 0.85rem;
+      margin-top: 0.75rem;
+      min-height: 1.2em;
+    }
+
+    .status-ok { color: #16a34a; }
+    .status-err { color: #dc2626; }
+
+    #books-list {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .book-item {
+      background: #fafafa;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .book-info h3 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 0.2rem;
+    }
+
+    .book-info .author {
+      font-size: 0.82rem;
+      color: #777;
+      margin-bottom: 0.3rem;
+    }
+
+    .book-info .desc {
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .book-date {
+      font-size: 0.75rem;
+      color: #aaa;
+      white-space: nowrap;
+      margin-left: 1rem;
+    }
+
+    .empty {
+      text-align: center;
+      color: #aaa;
+      font-size: 0.9rem;
+      padding: 2rem 0;
+    }
+
+    .count-badge {
+      display: inline-block;
+      background: #ede9fe;
+      color: #6366f1;
+      font-size: 0.75rem;
+      font-weight: 600;
+      border-radius: 99px;
+      padding: 0.1rem 0.6rem;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <span>📚</span>
+  <h1>Moja Biblioteka</h1>
+</header>
+
+<div class="container">
+
+  <div class="card">
+    <h2>Dodaj książkę</h2>
+    <form id="add-form">
+      <div class="form-group">
+        <label for="title">Tytuł *</label>
+        <input type="text" id="title" placeholder="np. Wiedźmin" required />
+      </div>
+      <div class="form-group">
+        <label for="author">Autor *</label>
+        <input type="text" id="author" placeholder="np. Andrzej Sapkowski" required />
+      </div>
+      <div class="form-group">
+        <label for="description">Opis (opcjonalnie)</label>
+        <textarea id="description" placeholder="Krótki opis książki..."></textarea>
+      </div>
+      <button type="submit" id="submit-btn">Dodaj książkę</button>
+      <div id="status"></div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>
+      Lista książek
+      <span class="count-badge" id="count">0</span>
+    </h2>
+    <div id="books-list">
+      <div class="empty">Ładowanie...</div>
+    </div>
+  </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
