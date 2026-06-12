@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Autorzy — Moja Biblioteka</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f0;color:#1a1a1a;min-height:100vh}
+    header{background:#fff;border-bottom:1px solid #e5e5e5;padding:1rem 2rem;display:flex;align-items:center;gap:.75rem}
+    header h1{font-size:1.25rem;font-weight:600}
+    nav{margin-left:auto}
+    nav a{font-size:.85rem;color:#6366f1;text-decoration:none;font-weight:500}
+    nav a:hover{text-decoration:underline}
+    .container{max-width:900px;margin:0 auto;padding:2rem 1rem}
+    .card{background:#fff;border-radius:12px;border:1px solid #e5e5e5;padding:1.5rem;margin-bottom:1.5rem}
+    .card h2{font-size:1rem;font-weight:600;margin-bottom:1rem;color:#333}
+    .authors-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem}
+    .author-card{background:#fafafa;border:1px solid #e5e5e5;border-radius:10px;padding:1.25rem;cursor:pointer;transition:box-shadow .15s,transform .15s}
+    .author-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-2px)}
+    .author-avatar{width:48px;height:48px;border-radius:50%;background:#ede9fe;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:600;color:#6366f1;margin-bottom:.75rem}
+    .author-card h3{font-size:.95rem;font-weight:600;margin-bottom:.25rem}
+    .author-card .books-count{font-size:.78rem;color:#888}
+    .empty{text-align:center;color:#aaa;font-size:.9rem;padding:2rem 0}
+  </style>
+</head>
+<body>
+<header>
+  <span>📚</span>
+  <h1>Moja Biblioteka</h1>
+  <nav><a href="index.html">← Powrót do książek</a></nav>
+</header>
+<div class="container">
+  <div class="card">
+    <h2>Wszyscy autorzy</h2>
+    <div class="authors-grid" id="authors-grid">
+      <div class="empty">Ładowanie...</div>
+    </div>
+  </div>
+</div>
+<script>
+const SUPABASE_URL = 'https://ranrnrbrurdobdbxgbsz.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhbnJucmJydXJkb2JkYnhnYnN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyOTYyODMsImV4cCI6MjA5Njg3MjI4M30.whc6MPhDdIhx1e98UVdMKVRnURmffZFOz0XGBTzAwmk';
+const headers = { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` };
+
+async function load() {
+  const [aRes, bRes] = await Promise.all([
+    fetch(`${SUPABASE_URL}/rest/v1/authors?order=name`, { headers }),
+    fetch(`${SUPABASE_URL}/rest/v1/books?select=author_id`, { headers }),
+  ]);
+  const authors = await aRes.json();
+  const books = await bRes.json();
+  const counts = {};
+  books.forEach(b => { if (b.author_id) counts[b.author_id] = (counts[b.author_id]||0)+1; });
+  const grid = document.getElementById('authors-grid');
+  if (!authors.length) { grid.innerHTML = '<div class="empty">Brak autorów.</div>'; return; }
+  grid.innerHTML = authors.map(a => {
+    const initials = a.name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const cnt = counts[a.id] || 0;
+    return `<div class="author-card" onclick="location.href='author.html?id=${a.id}'">
+      <div class="author-avatar">${initials}</div>
+      <h3>${a.name}</h3>
+      <div class="books-count">${cnt} ${cnt===1?'książka':cnt>1&&cnt<5?'książki':'książek'}</div>
+    </div>`;
+  }).join('');
+}
+load();
+</script>
+</body>
+</html>

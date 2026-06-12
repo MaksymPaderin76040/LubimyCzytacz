@@ -5,284 +5,250 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Moja Biblioteka</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #f5f5f0;
-      color: #1a1a1a;
-      min-height: 100vh;
-    }
-
-    header {
-      background: #fff;
-      border-bottom: 1px solid #e5e5e5;
-      padding: 1rem 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    header h1 { font-size: 1.25rem; font-weight: 600; }
-
-    .container {
-      max-width: 960px;
-      margin: 0 auto;
-      padding: 2rem 1rem;
-    }
-
-    .card {
-      background: #fff;
-      border-radius: 12px;
-      border: 1px solid #e5e5e5;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .card h2 { font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: #333; }
-
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-
-    .form-group { margin-bottom: 1rem; }
-    .form-group label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.375rem; color: #555; }
-    .form-group input, .form-group textarea, .form-group select {
-      width: 100%; padding: 0.5rem 0.75rem;
-      border: 1px solid #ddd; border-radius: 8px;
-      font-size: 0.9rem; font-family: inherit; outline: none;
-      transition: border-color 0.15s;
-    }
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { border-color: #6366f1; }
-    .form-group textarea { resize: vertical; min-height: 80px; }
-
-    .star-select { display: flex; gap: 4px; margin-top: 4px; }
-    .star-select input { display: none; }
-    .star-select label {
-      font-size: 1.5rem; cursor: pointer; color: #ddd;
-      transition: color 0.1s; width: auto; padding: 0;
-      border: none; background: none;
-    }
-    .star-select input:checked ~ label,
-    .star-select label:hover,
-    .star-select label:hover ~ label { color: #f59e0b; }
-    .star-select { flex-direction: row-reverse; justify-content: flex-end; }
-    .star-select label:hover,
-    .star-select label:hover ~ label { color: #f59e0b !important; }
-    .star-select input:checked ~ label { color: #f59e0b; }
-
-    button[type="submit"] {
-      background: #6366f1; color: #fff; border: none;
-      border-radius: 8px; padding: 0.5rem 1.25rem;
-      font-size: 0.9rem; font-weight: 500; cursor: pointer;
-      transition: background 0.15s;
-    }
-    button[type="submit"]:hover { background: #4f46e5; }
-    button[type="submit"]:disabled { background: #a5b4fc; cursor: not-allowed; }
-
-    #status { font-size: 0.85rem; margin-top: 0.75rem; min-height: 1.2em; }
-    .status-ok { color: #16a34a; }
-    .status-err { color: #dc2626; }
-
-    .toolbar {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-    }
-
-    .search-input {
-      flex: 1;
-      padding: 0.45rem 0.75rem;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-family: inherit;
-      outline: none;
-    }
-    .search-input:focus { border-color: #6366f1; }
-
-    .count-badge {
-      display: inline-block;
-      background: #ede9fe; color: #6366f1;
-      font-size: 0.75rem; font-weight: 600;
-      border-radius: 99px; padding: 0.1rem 0.6rem;
-      margin-left: 0.5rem; vertical-align: middle;
-    }
-
-    #books-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1rem;
-    }
-
-    .book-card {
-      background: #fafafa;
-      border: 1px solid #e5e5e5;
-      border-radius: 10px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      cursor: pointer;
-      transition: box-shadow 0.15s, transform 0.15s;
-      position: relative;
-    }
-    .book-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateY(-2px); }
-
-    .book-cover {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-      background: #ede9fe;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3rem;
-      flex-shrink: 0;
-    }
-    .book-cover img { width: 100%; height: 100%; object-fit: cover; }
-
-    .book-body { padding: 0.75rem; flex: 1; }
-    .book-body h3 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.2rem; line-height: 1.3; }
-    .book-body .author { font-size: 0.78rem; color: #777; margin-bottom: 0.4rem; }
-    .book-body .stars { font-size: 0.85rem; color: #f59e0b; }
-    .book-body .stars span { color: #ccc; }
-
-    .btn-delete {
-      position: absolute; top: 6px; right: 6px;
-      background: rgba(255,255,255,0.9);
-      border: 1px solid #eee;
-      border-radius: 6px;
-      width: 28px; height: 28px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 0.8rem;
-      opacity: 0; transition: opacity 0.15s;
-      color: #dc2626;
-      z-index: 2;
-    }
-    .book-card:hover .btn-delete { opacity: 1; }
-
-    .empty { text-align: center; color: #aaa; font-size: 0.9rem; padding: 2rem 0; }
-
-    /* Modal */
-    .modal-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.4);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-      padding: 1rem;
-    }
-    .modal-overlay.open { display: flex; }
-
-    .modal {
-      background: #fff;
-      border-radius: 16px;
-      max-width: 520px;
-      width: 100%;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 2rem;
-      position: relative;
-    }
-
-    .modal-close {
-      position: absolute; top: 1rem; right: 1rem;
-      background: none; border: none;
-      font-size: 1.25rem; cursor: pointer; color: #888;
-    }
-    .modal-close:hover { color: #333; }
-
-    .modal-cover {
-      width: 100%; height: 220px;
-      object-fit: cover; border-radius: 10px;
-      margin-bottom: 1.25rem;
-      background: #ede9fe;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 5rem;
-      overflow: hidden;
-    }
-    .modal-cover img { width: 100%; height: 100%; object-fit: cover; }
-
-    .modal h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.3rem; }
-    .modal .m-author { color: #777; font-size: 0.9rem; margin-bottom: 0.75rem; }
-    .modal .m-stars { font-size: 1.1rem; color: #f59e0b; margin-bottom: 1rem; }
-    .modal .m-desc { font-size: 0.9rem; color: #444; line-height: 1.6; }
-    .modal .m-date { font-size: 0.78rem; color: #bbb; margin-top: 1rem; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,sans-serif;background:#f5f5f0;color:#1a1a1a;min-height:100vh}
+    header{background:#fff;border-bottom:1px solid #e5e5e5;padding:1rem 2rem;display:flex;align-items:center;gap:.75rem}
+    header h1{font-size:1.25rem;font-weight:600}
+    nav{margin-left:auto;display:flex;gap:1rem}
+    nav a{font-size:.85rem;color:#6366f1;text-decoration:none;font-weight:500}
+    nav a:hover{text-decoration:underline}
+    .container{max-width:980px;margin:0 auto;padding:2rem 1rem}
+    .card{background:#fff;border-radius:12px;border:1px solid #e5e5e5;padding:1.5rem;margin-bottom:1.5rem}
+    .card h2{font-size:1rem;font-weight:600;margin-bottom:1rem;color:#333}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .form-group{margin-bottom:1rem}
+    .form-group label{display:block;font-size:.875rem;font-weight:500;margin-bottom:.375rem;color:#555}
+    .form-group input,.form-group textarea,.form-group select{width:100%;padding:.5rem .75rem;border:1px solid #ddd;border-radius:8px;font-size:.9rem;font-family:inherit;outline:none;transition:border-color .15s}
+    .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:#6366f1}
+    .form-group textarea{resize:vertical;min-height:80px}
+    .star-select{display:flex;flex-direction:row-reverse;justify-content:flex-end;gap:4px;margin-top:4px}
+    .star-select input{display:none}
+    .star-select label{font-size:1.5rem;cursor:pointer;color:#ddd;transition:color .1s;padding:0;border:none;background:none;width:auto}
+    .star-select label:hover,.star-select label:hover~label,.star-select input:checked~label{color:#f59e0b}
+    button[type=submit]{background:#6366f1;color:#fff;border:none;border-radius:8px;padding:.5rem 1.25rem;font-size:.9rem;font-weight:500;cursor:pointer;transition:background .15s}
+    button[type=submit]:hover{background:#4f46e5}
+    button[type=submit]:disabled{background:#a5b4fc;cursor:not-allowed}
+    .status-ok{color:#16a34a;font-size:.85rem;margin-top:.5rem}
+    .status-err{color:#dc2626;font-size:.85rem;margin-top:.5rem}
+    .toolbar{display:flex;gap:.75rem;margin-bottom:1rem;flex-wrap:wrap}
+    .search-input{flex:1;min-width:160px;padding:.45rem .75rem;border:1px solid #ddd;border-radius:8px;font-size:.9rem;font-family:inherit;outline:none}
+    .search-input:focus{border-color:#6366f1}
+    .genre-select{padding:.45rem .75rem;border:1px solid #ddd;border-radius:8px;font-size:.9rem;font-family:inherit;outline:none;background:#fff}
+    .count-badge{display:inline-block;background:#ede9fe;color:#6366f1;font-size:.75rem;font-weight:600;border-radius:99px;padding:.1rem .6rem;margin-left:.5rem;vertical-align:middle}
+    #books-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem}
+    .book-card{background:#fafafa;border:1px solid #e5e5e5;border-radius:10px;overflow:hidden;display:flex;flex-direction:column;cursor:pointer;transition:box-shadow .15s,transform .15s;position:relative}
+    .book-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.08);transform:translateY(-2px)}
+    .book-cover{width:100%;height:160px;background:#ede9fe;display:flex;align-items:center;justify-content:center;font-size:3rem;flex-shrink:0;overflow:hidden}
+    .book-cover img{width:100%;height:100%;object-fit:cover}
+    .book-body{padding:.75rem;flex:1}
+    .book-body h3{font-size:.88rem;font-weight:600;margin-bottom:.2rem;line-height:1.3}
+    .book-body .author{font-size:.78rem;color:#777;margin-bottom:.35rem}
+    .genre-badge{display:inline-block;background:#f0fdf4;color:#16a34a;font-size:.7rem;font-weight:600;border-radius:99px;padding:.1rem .5rem;margin-bottom:.3rem}
+    .btn-delete{position:absolute;top:6px;right:6px;background:rgba(255,255,255,.9);border:1px solid #eee;border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.8rem;opacity:0;transition:opacity .15s;color:#dc2626;z-index:2}
+    .book-card:hover .btn-delete{opacity:1}
+    .empty{text-align:center;color:#aaa;font-size:.9rem;padding:2rem 0}
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;padding:1rem}
+    .modal-overlay.open{display:flex}
+    .modal{background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;padding:2rem;position:relative}
+    .modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;font-size:1.25rem;cursor:pointer;color:#888}
+    .modal-close:hover{color:#333}
+    .modal-cover{width:100%;height:220px;border-radius:10px;margin-bottom:1.25rem;background:#ede9fe;display:flex;align-items:center;justify-content:center;font-size:5rem;overflow:hidden}
+    .modal-cover img{width:100%;height:100%;object-fit:cover}
+    .modal h2{font-size:1.2rem;font-weight:700;margin-bottom:.3rem}
+    .m-author{color:#6366f1;font-size:.9rem;margin-bottom:.4rem}
+    .m-author a{color:#6366f1;text-decoration:none;font-weight:500}
+    .m-author a:hover{text-decoration:underline}
+    .m-genre{display:inline-block;background:#f0fdf4;color:#16a34a;font-size:.78rem;font-weight:600;border-radius:99px;padding:.15rem .6rem;margin-bottom:.75rem}
+    .m-stars{font-size:1.1rem;margin-bottom:1rem}
+    .m-desc{font-size:.9rem;color:#444;line-height:1.6}
+    .m-date{font-size:.78rem;color:#bbb;margin-top:1rem}
+    .modal-actions{display:flex;gap:.75rem;margin-top:1.25rem}
+    .btn-edit{background:#6366f1;color:#fff;border:none;border-radius:8px;padding:.45rem 1rem;font-size:.85rem;font-weight:500;cursor:pointer}
+    .btn-edit:hover{background:#4f46e5}
+    .tabs{display:flex;gap:0;margin-bottom:1.25rem;border-bottom:1px solid #e5e5e5}
+    .tab{padding:.5rem 1rem;font-size:.88rem;font-weight:500;cursor:pointer;color:#777;border-bottom:2px solid transparent;margin-bottom:-1px;background:none;border-top:none;border-left:none;border-right:none}
+    .tab.active{color:#6366f1;border-bottom-color:#6366f1}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
   </style>
 </head>
 <body>
-
 <header>
   <span>📚</span>
   <h1>Moja Biblioteka</h1>
+  <nav>
+    <a href="authors.html">Autorzy</a>
+  </nav>
 </header>
 
 <div class="container">
 
   <div class="card">
-    <h2>Dodaj książkę</h2>
-    <form id="add-form">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="title">Tytuł *</label>
-          <input type="text" id="title" placeholder="np. Wiedźmin" required />
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('books-tab',this)">Dodaj książkę</button>
+      <button class="tab" onclick="switchTab('authors-tab',this)">Dodaj autora</button>
+    </div>
+
+    <div id="books-tab" class="tab-content active">
+      <form id="add-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="title">Tytuł *</label>
+            <input type="text" id="title" placeholder="np. Wiedźmin" required />
+          </div>
+          <div class="form-group">
+            <label for="genre">Gatunek</label>
+            <select id="genre">
+              <option value="">— wybierz —</option>
+              <option>Fantastyka</option><option>Kryminał</option><option>Romans</option>
+              <option>Thriller</option><option>Sci-Fi</option><option>Horror</option>
+              <option>Historia</option><option>Biografia</option><option>Poezja</option><option>Inne</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="author-text">Autor (wpisz) *</label>
+            <input type="text" id="author-text" placeholder="np. Andrzej Sapkowski" required />
+          </div>
+          <div class="form-group">
+            <label for="author_id">lub wybierz z listy</label>
+            <select id="author_id"><option value="">— brak —</option></select>
+          </div>
         </div>
         <div class="form-group">
-          <label for="author">Autor *</label>
-          <input type="text" id="author" placeholder="np. Andrzej Sapkowski" required />
+          <label for="cover_url">URL okładki (opcjonalnie)</label>
+          <input type="url" id="cover_url" placeholder="https://..." />
         </div>
-      </div>
-      <div class="form-group">
-        <label for="cover_url">URL okładki (opcjonalnie)</label>
-        <input type="url" id="cover_url" placeholder="https://..." />
-      </div>
-      <div class="form-group">
-        <label for="description">Opis (opcjonalnie)</label>
-        <textarea id="description" placeholder="Krótki opis książki..."></textarea>
-      </div>
-      <div class="form-group">
-        <label>Ocena</label>
-        <div class="star-select">
-          <input type="radio" name="rating" id="s5" value="5"><label for="s5">★</label>
-          <input type="radio" name="rating" id="s4" value="4"><label for="s4">★</label>
-          <input type="radio" name="rating" id="s3" value="3"><label for="s3">★</label>
-          <input type="radio" name="rating" id="s2" value="2"><label for="s2">★</label>
-          <input type="radio" name="rating" id="s1" value="1"><label for="s1">★</label>
+        <div class="form-group">
+          <label for="description">Opis (opcjonalnie)</label>
+          <textarea id="description" placeholder="Krótki opis..."></textarea>
         </div>
-      </div>
-      <button type="submit" id="submit-btn">Dodaj książkę</button>
-      <div id="status"></div>
-    </form>
+        <div class="form-group">
+          <label>Ocena</label>
+          <div class="star-select">
+            <input type="radio" name="rating" id="s5" value="5"><label for="s5">★</label>
+            <input type="radio" name="rating" id="s4" value="4"><label for="s4">★</label>
+            <input type="radio" name="rating" id="s3" value="3"><label for="s3">★</label>
+            <input type="radio" name="rating" id="s2" value="2"><label for="s2">★</label>
+            <input type="radio" name="rating" id="s1" value="1"><label for="s1">★</label>
+          </div>
+        </div>
+        <button type="submit" id="submit-btn">Dodaj książkę</button>
+        <div id="status"></div>
+      </form>
+    </div>
+
+    <div id="authors-tab" class="tab-content">
+      <form id="add-author-form">
+        <div class="form-group">
+          <label for="author-name">Imię i nazwisko *</label>
+          <input type="text" id="author-name" placeholder="np. Stanisław Lem" required />
+        </div>
+        <div class="form-group">
+          <label for="author-bio">Biogram (opcjonalnie)</label>
+          <textarea id="author-bio" placeholder="Krótki opis autora..."></textarea>
+        </div>
+        <button type="submit" id="add-author-btn">Dodaj autora</button>
+        <div id="author-status"></div>
+      </form>
+    </div>
   </div>
 
   <div class="card">
-    <h2>
-      Lista książek
-      <span class="count-badge" id="count">0</span>
-    </h2>
+    <h2>Lista książek <span class="count-badge" id="count">0</span></h2>
     <div class="toolbar">
       <input class="search-input" id="search" type="text" placeholder="🔍  Szukaj po tytule lub autorze..." />
+      <select class="genre-select" id="genre-filter">
+        <option value="">Wszystkie gatunki</option>
+        <option>Fantastyka</option><option>Kryminał</option><option>Romans</option>
+        <option>Thriller</option><option>Sci-Fi</option><option>Horror</option>
+        <option>Historia</option><option>Biografia</option><option>Poezja</option><option>Inne</option>
+      </select>
     </div>
-    <div id="books-grid">
-      <div class="empty">Ładowanie...</div>
-    </div>
+    <div id="books-grid"><div class="empty">Ładowanie...</div></div>
   </div>
-
 </div>
 
-<!-- Modal -->
+<!-- Detail modal -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <button class="modal-close" id="modal-close">✕</button>
     <div class="modal-cover" id="modal-cover"></div>
     <h2 id="modal-title"></h2>
-    <div class="m-author" id="modal-author"></div>
+    <div class="m-author" id="modal-author-link"></div>
+    <div id="modal-genre"></div>
     <div class="m-stars" id="modal-stars"></div>
     <div class="m-desc" id="modal-desc"></div>
     <div class="m-date" id="modal-date"></div>
+    <div class="modal-actions">
+      <button class="btn-edit" id="modal-edit-btn">✏️ Edytuj</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit modal -->
+<div class="modal-overlay" id="edit-overlay">
+  <div class="modal">
+    <button class="modal-close" id="edit-close">✕</button>
+    <h2 style="margin-bottom:1.25rem">Edytuj książkę</h2>
+    <form id="edit-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="edit-title">Tytuł *</label>
+          <input type="text" id="edit-title" required />
+        </div>
+        <div class="form-group">
+          <label for="edit-genre">Gatunek</label>
+          <select id="edit-genre">
+            <option value="">— wybierz —</option>
+            <option>Fantastyka</option><option>Kryminał</option><option>Romans</option>
+            <option>Thriller</option><option>Sci-Fi</option><option>Horror</option>
+            <option>Historia</option><option>Biografia</option><option>Poezja</option><option>Inne</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="edit-author-text">Autor (wpisz)</label>
+          <input type="text" id="edit-author-text" />
+        </div>
+        <div class="form-group">
+          <label for="edit_author_id">lub wybierz z listy</label>
+          <select id="edit_author_id"><option value="">— brak —</option></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="edit-cover">URL okładki</label>
+        <input type="url" id="edit-cover" placeholder="https://..." />
+      </div>
+      <div class="form-group">
+        <label for="edit-description">Opis</label>
+        <textarea id="edit-description"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Ocena</label>
+        <div class="star-select">
+          <input type="radio" name="edit_rating" id="es5" value="5"><label for="es5">★</label>
+          <input type="radio" name="edit_rating" id="es4" value="4"><label for="es4">★</label>
+          <input type="radio" name="edit_rating" id="es3" value="3"><label for="es3">★</label>
+          <input type="radio" name="edit_rating" id="es2" value="2"><label for="es2">★</label>
+          <input type="radio" name="edit_rating" id="es1" value="1"><label for="es1">★</label>
+        </div>
+      </div>
+      <button type="submit" id="edit-submit-btn">Zapisz zmiany</button>
+    </form>
   </div>
 </div>
 
 <script src="app.js"></script>
+<script>
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
 </body>
 </html>
