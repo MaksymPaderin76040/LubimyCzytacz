@@ -1,4 +1,4 @@
-# 📚 LubimyCzytacz
+# 📚 LubimyCzytаć
 
 Prosta aplikacja webowa inspirowana serwisem LubimyCzytać.pl, zbudowana jako projekt semestralny na kurs *Wprowadzenie do technologii internetowych*.
 
