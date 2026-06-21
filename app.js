@@ -1,3 +1,5 @@
+// Autorzy: Maksym Paderin 76040 i Yahor Dziamyanenka 77143
+
 const SUPABASE_URL = 'https://ranrnrbrurdobdbxgbsz.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJhbnJucmJydXJkb2JkYnhnYnN6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyOTYyODMsImV4cCI6MjA5Njg3MjI4M30.whc6MPhDdIhx1e98UVdMKVRnURmffZFOz0XGBTzAwmk';
 const API = `${SUPABASE_URL}/rest/v1`;

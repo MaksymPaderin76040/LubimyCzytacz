@@ -74,3 +74,4 @@ CREATE TABLE books (
 ---
 
 *Projekt semestralny — Wprowadzenie do technologii internetowych*
+*Autorzy: Maksym Paderin 76040 i Yahor Dziamyanenka 77143*
